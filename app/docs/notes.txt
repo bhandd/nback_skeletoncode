@@ -1,0 +1,20 @@
+
+
+###########################Get the game type from C code###########################
+1. Create an enum for the game type in Kotlin:
+
+enum class GameType {
+    VISUAL,
+    AUDIO
+}
+
+2. Map the result from the function in the C code to the game type in Kotlin:
+
+Assuming you have a C function that returns a string representing the game type, you can map it to the GameType enum in Kotlin.
+
+3. Call the function in the C code to get the game type and map it to the enum:
+
+val gameTypeString = getGameTypeFromC() // Call the C function
+val gameType = GameType.valueOf(gameTypeString.toUpperCase())
+
+Make sure the C function is properly integrated and accessible from your Kotlin code.

@@ -13,7 +13,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -29,7 +28,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import mobappdev.example.nback_cimpl.R
 import mobappdev.example.nback_cimpl.ui.viewmodels.FakeVM
 import mobappdev.example.nback_cimpl.ui.viewmodels.GameViewModel
@@ -49,6 +47,8 @@ import mobappdev.example.nback_cimpl.ui.viewmodels.GameViewModel
 
 @Composable
 fun HomeScreen(
+    onVisualButtonClicked: () -> Unit,
+    onAudioButtonClicked: () -> Unit,
     vm: GameViewModel
 ) {
     val highscore by vm.highscore.collectAsState()  // Highscore is its own StateFlow
@@ -104,14 +104,15 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(onClick = {
-                    // Todo: change this button behaviour
-                    scope.launch {
-                        snackBarHostState.showSnackbar(
-                            message = "Hey! you clicked the audio button"
-                        )
-                    }
-                }) {
+                Button(onClick = onAudioButtonClicked
+                    //{
+//                    scope.launch {
+//                        snackBarHostState.showSnackbar(
+//                            message = "Hey! you clicked the audio button"
+//                        )
+  //                  }
+            //    }
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.sound_on),
                         contentDescription = "Sound",
@@ -121,15 +122,18 @@ fun HomeScreen(
                     )
                 }
                 Button(
-                    onClick = {
-                        // Todo: change this button behaviour
-                        scope.launch {
-                            snackBarHostState.showSnackbar(
-                                message = "Hey! you clicked the visual button",
-                                duration = SnackbarDuration.Short
-                            )
-                        }
-                    }) {
+                    onClick =
+                    //{
+
+                        onVisualButtonClicked
+//                        scope.launch {
+//                            snackBarHostState.showSnackbar(
+//                                message = "Hey! you clicked the visual button",
+//                                duration = SnackbarDuration.Short
+//                            )
+//                        }
+//                    }
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.visual),
                         contentDescription = "Visual",
@@ -143,11 +147,14 @@ fun HomeScreen(
     }
 }
 
-@Preview
+
+
+@Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    // Since I am injecting a VM into my homescreen that depends on Application context, the preview doesn't work.
-    Surface(){
-        HomeScreen(FakeVM())
-    }
+    HomeScreen(
+        onVisualButtonClicked = {},
+        onAudioButtonClicked = {},
+        vm = FakeVM()
+    )
 }
