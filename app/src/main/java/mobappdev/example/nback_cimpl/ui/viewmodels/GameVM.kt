@@ -44,6 +44,7 @@ interface GameViewModel {
     fun startGame()
 
     fun checkMatch()
+    fun endGame()
 }
 
 class GameVM(
@@ -76,6 +77,8 @@ class GameVM(
     }
 
     override fun startGame() {
+        println("Game started")
+        Log.d("GameVM", "Game started")
         job?.cancel()  // Cancel any existing game loop
 
         // Get the events from our C-model (returns IntArray, so we need to convert to Array<Int>)
@@ -93,11 +96,23 @@ class GameVM(
     }
 
     override fun checkMatch() {
-        /**
+  /**
          * Todo: This function should check if there is a match when the user presses a match button
          * Make sure the user can only register a match once for each event.
          */
+        val currentIndex = events.indexOf(_gameState.value.eventValue)
+            if (currentIndex >= nBack && _gameState.value.eventValue == events[currentIndex - nBack]) {
+            _score.value += 1
+            Log.d("GameVM", "Match found! Current score: ${_score.value}")
+
+        }
+
     }
+
+    override fun endGame(){
+        job?.cancel()
+    }
+
     private fun runAudioGame() {
         // Todo: Make work for Basic grade
     }
@@ -164,5 +179,8 @@ class FakeVM: GameViewModel{
     }
 
     override fun checkMatch() {
+    }
+    override fun endGame() {
+
     }
 }

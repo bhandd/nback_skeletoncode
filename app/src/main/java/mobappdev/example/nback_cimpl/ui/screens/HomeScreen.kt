@@ -80,16 +80,16 @@ fun HomeScreen(
                     Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (gameState.eventValue != -1) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = "Current eventValue is: ${gameState.eventValue}",
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    Button(onClick = vm::startGame) {
-                        Text(text = "Generate eventValues")
-                    }
+//                    if (gameState.eventValue != -1) {
+//                        Text(
+//                            modifier = Modifier.fillMaxWidth(),
+//                            text = "Current eventValue is: ${gameState.eventValue}",
+//                            textAlign = TextAlign.Center
+//                        )
+//                    }
+//                    Button(onClick = vm::startGame) {
+//                        Text(text = "Generate eventValues")
+//                    }
                 }
             }
             Text(
@@ -105,13 +105,7 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(onClick = onAudioButtonClicked
-                    //{
-//                    scope.launch {
-//                        snackBarHostState.showSnackbar(
-//                            message = "Hey! you clicked the audio button"
-//                        )
-  //                  }
-            //    }
+
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.sound_on),
@@ -123,16 +117,8 @@ fun HomeScreen(
                 }
                 Button(
                     onClick =
-                    //{
-
                         onVisualButtonClicked
-//                        scope.launch {
-//                            snackBarHostState.showSnackbar(
-//                                message = "Hey! you clicked the visual button",
-//                                duration = SnackbarDuration.Short
-//                            )
-//                        }
-//                    }
+
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.visual),

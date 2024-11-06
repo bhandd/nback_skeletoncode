@@ -52,6 +52,9 @@ fun GameScreen(
     vm.startGame()
     val gameState by vm.gameState.collectAsState()
     val number =gameState.gameType
+    val score by vm.score.collectAsState()
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -122,15 +125,28 @@ fun GameScreen(
                         .size(100.dp)
                         .background(boxColor)
                 )
+
             }
+
         }
+        Text(text="Score: $score", fontSize = 24.sp)
+        Spacer(modifier = Modifier.size(200.dp))
+
+        Button(onClick = {vm.checkMatch()},
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary
+            )) {
+            Text(text = "Match!")
+        }
+
         Button(
-            onClick = navigateToHomeScreen,
+            onClick = {vm.endGame()//todo: fix this
+                navigateToHomeScreen()},
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondary
             )
         ) {
-            Text(text = "Goto Screen 1")
+            Text(text = "Goto Home Screen")
         }
     }
     }
