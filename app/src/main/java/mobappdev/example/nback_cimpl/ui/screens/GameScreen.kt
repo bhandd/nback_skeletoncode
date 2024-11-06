@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -48,7 +51,7 @@ fun GameScreen(
     vm.setGameType(gameType)
     vm.startGame()
     val gameState by vm.gameState.collectAsState()
-
+    val number =gameState.gameType
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -58,56 +61,68 @@ fun GameScreen(
     ) {
         Spacer(modifier = Modifier.size(16.dp))
 
-        for (i in 0..2) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                for (j in 0..2) {
-                    val boxValue = i * 3 + j + 1
-                    val isHighlighted = remember { mutableStateOf(false) }
+//        for (i in 0..2) {
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.SpaceEvenly,
+//            ) {
+//
+//                for (j in 0..2) {
+//                    val boxValue = i * 3 + j + 1
+//                    val isHighlighted = remember { mutableStateOf(false) }
+//
+//                    LaunchedEffect(gameState) {
+//                        if (boxValue == gameState.eventValue) {
+//                            isHighlighted.value = true
+//                            delay(1000)
+//                        isHighlighted.value = false
+//                        }
+//                    }
+//
+//                    val boxColor = if (isHighlighted.value) {
+//                        Color.Green // Change to green color
+//                    } else {
+//                        MaterialTheme.colorScheme.primary
+//                    }
+//
+//                    Box(
+//                        modifier = Modifier
+//                            .size(100.dp)
+//                            .background(boxColor)
+//                    )
+//                }
+//            }
+//            Spacer(modifier = Modifier.size(16.dp))
+//        }
 
-                    LaunchedEffect(gameState) {
-                        if (boxValue == gameState.eventValue) {
-                            isHighlighted.value = true
-                        isHighlighted.value = boxValue == gameState.eventValue
-                        }
-                    }
 
-                    val boxColor = if (isHighlighted.value) {
-                        Color.Green // Change to green color
-                    } else {
-                        MaterialTheme.colorScheme.primary
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .background(boxColor)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.size(16.dp))
-        }
-
-
-        Spacer(modifier = Modifier.size(16.dp))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
         ) {
 
-            Text(
-                text = gameType.toString()+"Current eventValue is: ${gameState.eventValue}",
-                fontSize = 24.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
+            items((1..9).toList()) { boxValue ->
+                val isHighlighted = remember { mutableStateOf(false) }
 
+                LaunchedEffect(gameState) {
+                    isHighlighted.value = boxValue == gameState.eventValue
+                }
 
-            )
+                val boxColor = if (isHighlighted.value) {
+                    Color.Green // Change to green color
+                } else {
+                    MaterialTheme.colorScheme.primary
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .background(boxColor)
+                )
+            }
         }
         Button(
             onClick = navigateToHomeScreen,
