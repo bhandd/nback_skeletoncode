@@ -18,6 +18,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,8 +48,14 @@ fun GameScreen(
     val gameState by vm.gameState.collectAsState()
     val number =gameState.gameType
     val score by vm.score.collectAsState()
-    val isButtonEnabled by remember { mutableStateOf(true) }
+    val isButtonEnabled by vm.gameState.collectAsState() //todo: delete this
+    var isGameRunning = gameState.isGameRunning
 
+    LaunchedEffect(isGameRunning) {
+        if (!isGameRunning) {
+            navigateToHomeScreen()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -88,27 +95,33 @@ fun GameScreen(
 
         }
         Text(text="Score: $score", fontSize = 24.sp)
-        Text(text="CurrentEventVal: "+ gameState.eventValue, fontSize = 24.sp)
-        Text(text="PreviousEventVal: "+ gameState.NBackValue, fontSize = 24.sp)
-        Spacer(modifier = Modifier.size(200.dp))
+        //todo: delete this
+//        Text(text="CurrentEventVal: "+ gameState.eventValue, fontSize = 24.sp)
+//        Text(text="PreviousEventVal: "+ gameState.NBackValue, fontSize = 24.sp)
+//        Spacer(modifier = Modifier.size(200.dp))
 
-        Button(onClick = {vm.checkMatch()},
+        Button(onClick = {vm.checkMatch()  },
+            enabled = gameState.isButtonEnabled,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondary
             )) {
             Text(text = "Match!")
         }
 
-        Button(
-            onClick = {vm.endGame()//todo: fix this
-                navigateToHomeScreen()},
-            isButtonEnabled = false
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary
-            )
-        ) {
-            Text(text = "Goto Home Screen")
-        }
+        //todo: check why this doesn't work
+//        Button(
+//            onClick = {
+//                vm.endGame()
+//                navController.popBackStack()
+//                //navigateToHomeScreen()
+//                      },
+//            colors = ButtonDefaults.buttonColors(
+//                containerColor = MaterialTheme.colorScheme.secondary
+//            )
+//        ) {
+//            Text(text = "Goto Home Screen")
+//        }
+
     }
     }
 

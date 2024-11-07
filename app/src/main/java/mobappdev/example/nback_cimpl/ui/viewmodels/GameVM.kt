@@ -45,11 +45,14 @@ interface GameViewModel {
     fun startGame()
 
     fun checkMatch()
+    fun saveHighScore(score: Int)
     fun endGame()
+
 }
 
 class GameVM(
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+   // private val navigateToHomeScreen: () -> Unit //todo: correct?
 ): GameViewModel, ViewModel() {
     private val _gameState = MutableStateFlow(GameState())
     override val gameState: StateFlow<GameState>
@@ -76,8 +79,16 @@ class GameVM(
         // update the gametype in the gamestate
         _gameState.value = _gameState.value.copy(gameType = gameType)
     }
+    override fun saveHighScore(score: Int) {
+        viewModelScope.launch {
+            saveHighScore(userPreferencesRepository, score)
+        }
+    }
+
 
     override fun startGame() {
+        //todo: set isGameRunning to true?
+        _gameState.value.isGameRunning = true
         println("Game started")
         Log.d("GameVM", "Game started")
         job?.cancel()  // Cancel any existing game loop
@@ -93,7 +104,7 @@ class GameVM(
                 GameType.VISUAL -> runVisualGame(events)
             }
             // Todo: update the highscore(why here and not in endgame?)
-            _highscore.value = _score.value.coerceAtLeast(_highscore.value)
+
         }
     }
 
@@ -101,7 +112,7 @@ class GameVM(
 
 
     override fun checkMatch() {
-
+        _gameState.value = _gameState.value.copy(isButtonEnabled = false)
 Log.d("GameVM", "Checking match" + "Current Event Value: " + _gameState.value.eventValue + "NBack Value: " + _gameState.value.NBackValue)
 val currentValue = _gameState.value.eventValue
 
@@ -114,9 +125,13 @@ val currentValue = _gameState.value.eventValue
 
 
 
-    override fun endGame(){
+    override fun endGame() {
+        _gameState.value.isGameRunning = false
         job?.cancel()
+        _highscore.value = _score.value.coerceAtLeast(_highscore.value)
+        saveHighScore(_highscore.value)
         _score.value = 0
+//navigateToHomeScreen()
     }
 
     private fun runAudioGame() {
@@ -129,11 +144,10 @@ val currentValue = _gameState.value.eventValue
             val nBackValue = if (index >= nBack) events[index - nBack] else -1
             _gameState.value = _gameState.value.copy(eventValue = value, NBackValue = nBackValue)
          //  checkMatch()
-            if(nBackValue == gameState.value.eventValue) {
-               // Log.d("GameVM", "Event Value: $value, NBack Value: $nBackValue")
-            }
+            _gameState.value = _gameState.value.copy(isButtonEnabled = true)
             delay(eventInterval)
         }
+
         endGame()
     }
 
@@ -160,6 +174,12 @@ val currentValue = _gameState.value.eventValue
     }
 }
 
+suspend fun saveHighScore(userPreferencesRepository: UserPreferencesRepository, score: Int) {
+
+          userPreferencesRepository.saveHighScore(score)
+  }
+
+
 // Class with the different game types
 enum class GameType{
     AUDIO,
@@ -171,7 +191,9 @@ data class GameState(
     // You can use this state to push values from the VM to your UI.
     val gameType: GameType = GameType.VISUAL,  // Type of the game
     val eventValue: Int = -1,  // The value of the array string
-    val NBackValue: Int = -1  // The value of the previous event
+    val NBackValue: Int = -1,  // The value of the previous event
+    val isButtonEnabled: Boolean = true,  // Enable the button
+    var isGameRunning: Boolean = false  // Check if the game ended
 
 )
 
@@ -193,7 +215,10 @@ class FakeVM: GameViewModel{
 
     override fun checkMatch() {
     }
+    override fun saveHighScore(score: Int) {
+    }
     override fun endGame() {
 
     }
+
 }
