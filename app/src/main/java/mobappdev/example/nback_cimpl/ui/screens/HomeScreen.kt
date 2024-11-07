@@ -81,16 +81,7 @@ fun HomeScreen(
                     Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-//                    if (gameState.eventValue != -1) {
-//                        Text(
-//                            modifier = Modifier.fillMaxWidth(),
-//                            text = "Current eventValue is: ${gameState.eventValue}",
-//                            textAlign = TextAlign.Center
-//                        )
-//                    }
-//                    Button(onClick = vm::startGame) {
-//                        Text(text = "Generate eventValues")
-//                    }
+
                 }
             }
             Text(
@@ -105,8 +96,10 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(onClick = onAudioButtonClicked
-
+                Button(onClick ={ onAudioButtonClicked()
+                        vm.setGameType(GameType.AUDIO)
+                        vm.startGame()
+            }
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.sound_on),

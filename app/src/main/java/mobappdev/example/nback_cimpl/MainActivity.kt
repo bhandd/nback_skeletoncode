@@ -94,14 +94,14 @@ fun Navigation(gameVM: GameVM) {
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun DefaultPreview() {
-//    NBack_CImplTheme {
-//        HomeScreen(
-//            onVisualButtonClicked = {},
-//            onAudioButtonClicked = {},
-//            vm = FakeVM()
-//        )
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    NBack_CImplTheme {
+        HomeScreen(
+            onVisualButtonClicked = {},
+            onAudioButtonClicked = {},
+            vm = FakeVM()
+        )
+    }
+}

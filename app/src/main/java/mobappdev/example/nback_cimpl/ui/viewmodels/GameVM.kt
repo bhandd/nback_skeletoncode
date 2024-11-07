@@ -1,6 +1,8 @@
 package mobappdev.example.nback_cimpl.ui.viewmodels
 
+import android.speech.tts.TextToSpeech
 import android.util.Log
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -12,7 +14,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import mobappdev.example.nback_cimpl.GameApplication
 import mobappdev.example.nback_cimpl.NBackHelper
@@ -52,7 +53,7 @@ interface GameViewModel {
 
 class GameVM(
     private val userPreferencesRepository: UserPreferencesRepository,
-   // private val navigateToHomeScreen: () -> Unit //todo: correct?
+    textToSpeech: TextToSpeech,
 ): GameViewModel, ViewModel() {
     private val _gameState = MutableStateFlow(GameState())
     override val gameState: StateFlow<GameState>
@@ -74,6 +75,7 @@ class GameVM(
 
     private val nBackHelper = NBackHelper()  // Helper that generate the event array
     private var events = emptyArray<Int>()  // Array with all events
+    private lateinit var textToSpeech: TextToSpeech
 
     override fun setGameType(gameType: GameType) {
         // update the gametype in the gamestate
@@ -87,9 +89,8 @@ class GameVM(
 
 
     override fun startGame() {
-        //todo: set isGameRunning to true?
+
         _gameState.value.isGameRunning = true
-        println("Game started")
         Log.d("GameVM", "Game started")
         job?.cancel()  // Cancel any existing game loop
 
@@ -113,10 +114,7 @@ class GameVM(
 
     override fun checkMatch() {
         _gameState.value = _gameState.value.copy(isButtonEnabled = false)
-Log.d("GameVM", "Checking match" + "Current Event Value: " + _gameState.value.eventValue + "NBack Value: " + _gameState.value.NBackValue)
-val currentValue = _gameState.value.eventValue
-
-        Log.d("GameScreen", "Current Value: $currentValue, NBack Value: ${gameState.value.NBackValue}")
+        val currentValue = _gameState.value.eventValue
         val nBackValue = _gameState.value.NBackValue
         if (currentValue == nBackValue) {
             _score.value += 1
@@ -134,8 +132,19 @@ val currentValue = _gameState.value.eventValue
 //navigateToHomeScreen()
     }
 
-    private fun runAudioGame() {
-        // Todo: Make work for Basic grade
+
+
+    private suspend fun runAudioGame() {
+        for ((index, value) in events.withIndex()) {
+            val nBackValue = if (index >= nBack) events[index - nBack] else -1
+            _gameState.value = _gameState.value.copy(eventValue = value, NBackValue = nBackValue)
+            _gameState.value.audioValue = value
+            _gameState.value = _gameState.value.copy(isButtonEnabled = true)
+            delay(eventInterval)
+        }
+        _gameState.value.isGameRunning = false
+        endGame()
+
     }
 
     private suspend fun runVisualGame(events: Array<Int>){
@@ -143,11 +152,10 @@ val currentValue = _gameState.value.eventValue
         for ((index, value) in events.withIndex()) {
             val nBackValue = if (index >= nBack) events[index - nBack] else -1
             _gameState.value = _gameState.value.copy(eventValue = value, NBackValue = nBackValue)
-         //  checkMatch()
             _gameState.value = _gameState.value.copy(isButtonEnabled = true)
             delay(eventInterval)
         }
-
+        _gameState.value.isGameRunning = false
         endGame()
     }
 
@@ -155,11 +163,19 @@ val currentValue = _gameState.value.eventValue
         // Todo: Make work for Higher grade
     }
 
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as GameApplication)
-                GameVM(application.userPreferencesRespository)
+                val textToSpeech = TextToSpeech(application.applicationContext ) { status ->
+                    if (status == TextToSpeech.SUCCESS) {
+                        Log.e("GameVM", "TextToSpeech succeeded")
+                    } else {
+                        Log.e("GameVM", "TextToSpeech failed")
+                    }
+                }
+                GameVM(application.userPreferencesRespository, textToSpeech)
             }
         }
     }
@@ -171,6 +187,9 @@ val currentValue = _gameState.value.eventValue
                 _highscore.value = it
             }
         }
+        // Initialize TextToSpeech only if the game type is AUDIO
+
+
     }
 }
 
@@ -193,8 +212,8 @@ data class GameState(
     val eventValue: Int = -1,  // The value of the array string
     val NBackValue: Int = -1,  // The value of the previous event
     val isButtonEnabled: Boolean = true,  // Enable the button
-    var isGameRunning: Boolean = false  // Check if the game ended
-
+    var isGameRunning: Boolean = false,  // Check if the game ended
+    var audioValue: Int = -1  // The value of the audio event
 )
 
 class FakeVM: GameViewModel{
