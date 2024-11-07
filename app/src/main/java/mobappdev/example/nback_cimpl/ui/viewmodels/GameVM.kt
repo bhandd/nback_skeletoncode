@@ -12,6 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import mobappdev.example.nback_cimpl.GameApplication
 import mobappdev.example.nback_cimpl.NBackHelper
@@ -91,26 +92,31 @@ class GameVM(
                 GameType.AUDIOVISUAL -> runAudioVisualGame()
                 GameType.VISUAL -> runVisualGame(events)
             }
-            // Todo: update the highscore
+            // Todo: update the highscore(why here and not in endgame?)
+            _highscore.value = _score.value.coerceAtLeast(_highscore.value)
         }
     }
+
+
+
 
     override fun checkMatch() {
-  /**
-         * Todo: This function should check if there is a match when the user presses a match button
-         * Make sure the user can only register a match once for each event.
-         */
-        val currentIndex = events.indexOf(_gameState.value.eventValue)
-            if (currentIndex >= nBack && _gameState.value.eventValue == events[currentIndex - nBack]) {
+
+Log.d("GameVM", "Checking match" + "Current Event Value: " + _gameState.value.eventValue + "NBack Value: " + _gameState.value.NBackValue)
+val currentValue = _gameState.value.eventValue
+
+        Log.d("GameScreen", "Current Value: $currentValue, NBack Value: ${gameState.value.NBackValue}")
+        val nBackValue = _gameState.value.NBackValue
+        if (currentValue == nBackValue) {
             _score.value += 1
-            Log.d("GameVM", "Match found! Current score: ${_score.value}")
-
         }
-
     }
+
+
 
     override fun endGame(){
         job?.cancel()
+        _score.value = 0
     }
 
     private fun runAudioGame() {
@@ -118,12 +124,17 @@ class GameVM(
     }
 
     private suspend fun runVisualGame(events: Array<Int>){
-        // Todo: Replace this code for actual game code
-        for (value in events) {
-            _gameState.value = _gameState.value.copy(eventValue = value)
+        // Todo: Check if this needs some more game logic or checks
+        for ((index, value) in events.withIndex()) {
+            val nBackValue = if (index >= nBack) events[index - nBack] else -1
+            _gameState.value = _gameState.value.copy(eventValue = value, NBackValue = nBackValue)
+         //  checkMatch()
+            if(nBackValue == gameState.value.eventValue) {
+               // Log.d("GameVM", "Event Value: $value, NBack Value: $nBackValue")
+            }
             delay(eventInterval)
         }
-
+        endGame()
     }
 
     private fun runAudioVisualGame(){
@@ -159,7 +170,9 @@ enum class GameType{
 data class GameState(
     // You can use this state to push values from the VM to your UI.
     val gameType: GameType = GameType.VISUAL,  // Type of the game
-    val eventValue: Int = -1  // The value of the array string
+    val eventValue: Int = -1,  // The value of the array string
+    val NBackValue: Int = -1  // The value of the previous event
+
 )
 
 class FakeVM: GameViewModel{

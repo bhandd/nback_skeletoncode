@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import mobappdev.example.nback_cimpl.R
 import mobappdev.example.nback_cimpl.ui.viewmodels.FakeVM
+import mobappdev.example.nback_cimpl.ui.viewmodels.GameType
 import mobappdev.example.nback_cimpl.ui.viewmodels.GameViewModel
 
 /**
@@ -116,8 +117,10 @@ fun HomeScreen(
                     )
                 }
                 Button(
-                    onClick =
-                        onVisualButtonClicked
+                    onClick ={
+                        onVisualButtonClicked()
+                                vm.setGameType(GameType.VISUAL)
+                                vm.startGame()}
 
                 ) {
                     Icon(

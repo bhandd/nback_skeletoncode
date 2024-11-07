@@ -86,6 +86,7 @@ fun Navigation(gameVM: GameVM) {
                 },
                 onAudioButtonClicked = {
                     navController.navigate("GameScreen/audio")
+
                 },
                 vm = gameVM
             )

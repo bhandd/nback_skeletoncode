@@ -1,15 +1,13 @@
 @file:Suppress("UNREACHABLE_CODE")
 
-import android.annotation.SuppressLint
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -20,7 +18,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,12 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import kotlinx.coroutines.delay
 import mobappdev.example.nback_cimpl.ui.viewmodels.FakeVM
 import mobappdev.example.nback_cimpl.ui.viewmodels.GameType
 import mobappdev.example.nback_cimpl.ui.viewmodels.GameViewModel
@@ -48,11 +43,11 @@ fun GameScreen(
     navigateToHomeScreen: () -> Unit
 
 ) {
-    vm.setGameType(gameType)
-    vm.startGame()
+
     val gameState by vm.gameState.collectAsState()
     val number =gameState.gameType
     val score by vm.score.collectAsState()
+    val isButtonEnabled by remember { mutableStateOf(true) }
 
 
     Column(
@@ -64,41 +59,6 @@ fun GameScreen(
     ) {
         Spacer(modifier = Modifier.size(16.dp))
 
-//        for (i in 0..2) {
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.SpaceEvenly,
-//            ) {
-//
-//                for (j in 0..2) {
-//                    val boxValue = i * 3 + j + 1
-//                    val isHighlighted = remember { mutableStateOf(false) }
-//
-//                    LaunchedEffect(gameState) {
-//                        if (boxValue == gameState.eventValue) {
-//                            isHighlighted.value = true
-//                            delay(1000)
-//                        isHighlighted.value = false
-//                        }
-//                    }
-//
-//                    val boxColor = if (isHighlighted.value) {
-//                        Color.Green // Change to green color
-//                    } else {
-//                        MaterialTheme.colorScheme.primary
-//                    }
-//
-//                    Box(
-//                        modifier = Modifier
-//                            .size(100.dp)
-//                            .background(boxColor)
-//                    )
-//                }
-//            }
-//            Spacer(modifier = Modifier.size(16.dp))
-//        }
-
-
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier.weight(1f),
@@ -108,17 +68,15 @@ fun GameScreen(
         ) {
 
             items((1..9).toList()) { boxValue ->
-                val isHighlighted = remember { mutableStateOf(false) }
-
-                LaunchedEffect(gameState) {
-                    isHighlighted.value = boxValue == gameState.eventValue
-                }
-
-                val boxColor = if (isHighlighted.value) {
-                    Color.Green // Change to green color
-                } else {
-                    MaterialTheme.colorScheme.primary
-                }
+                val isHighlighted = boxValue == gameState.eventValue
+                val boxColor by animateColorAsState(
+                    targetValue = if (isHighlighted) {
+                        Color.Green // Change to green color
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
+                    animationSpec = tween(durationMillis = 300) // Adjust the duration as needed
+                )
 
                 Box(
                     modifier = Modifier
@@ -130,6 +88,8 @@ fun GameScreen(
 
         }
         Text(text="Score: $score", fontSize = 24.sp)
+        Text(text="CurrentEventVal: "+ gameState.eventValue, fontSize = 24.sp)
+        Text(text="PreviousEventVal: "+ gameState.NBackValue, fontSize = 24.sp)
         Spacer(modifier = Modifier.size(200.dp))
 
         Button(onClick = {vm.checkMatch()},
@@ -142,6 +102,7 @@ fun GameScreen(
         Button(
             onClick = {vm.endGame()//todo: fix this
                 navigateToHomeScreen()},
+            isButtonEnabled = false
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondary
             )
