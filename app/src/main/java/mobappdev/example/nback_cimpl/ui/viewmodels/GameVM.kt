@@ -105,6 +105,9 @@ class GameVM(
                 GameType.VISUAL -> runVisualGame(events)
             }
             // Todo: update the highscore(why here and not in endgame?)
+            _highscore.value = _score.value.coerceAtLeast(_highscore.value)
+            saveHighScore(_highscore.value)
+            endGame()
 
         }
     }
@@ -126,10 +129,7 @@ class GameVM(
     override fun endGame() {
         _gameState.value.isGameRunning = false
         job?.cancel()
-        _highscore.value = _score.value.coerceAtLeast(_highscore.value)
-        saveHighScore(_highscore.value)
         _score.value = 0
-//navigateToHomeScreen()
     }
 
 
@@ -143,12 +143,12 @@ class GameVM(
             delay(eventInterval)
         }
         _gameState.value.isGameRunning = false
-        endGame()
-
+       // endGame()
     }
 
+
+
     private suspend fun runVisualGame(events: Array<Int>){
-        // Todo: Check if this needs some more game logic or checks
         for ((index, value) in events.withIndex()) {
             val nBackValue = if (index >= nBack) events[index - nBack] else -1
             _gameState.value = _gameState.value.copy(eventValue = value, NBackValue = nBackValue)
@@ -156,7 +156,7 @@ class GameVM(
             delay(eventInterval)
         }
         _gameState.value.isGameRunning = false
-        endGame()
+        //endGame()
     }
 
     private fun runAudioVisualGame(){

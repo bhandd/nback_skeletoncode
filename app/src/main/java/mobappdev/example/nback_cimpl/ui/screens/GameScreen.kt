@@ -88,7 +88,7 @@ fun GameScreen(
             if (textToSpeech == null) {
                 textToSpeech = TextToSpeech(context) { status ->
                     if (status == TextToSpeech.SUCCESS) {
-                        textToSpeech?.language = Locale.JAPAN
+                        textToSpeech?.language = Locale.US
                         speak(gameState.audioValue.toString())
                     }
                 }
